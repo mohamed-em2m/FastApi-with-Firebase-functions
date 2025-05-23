@@ -1,83 +1,68 @@
-from firebase_functions import https_fn,options
-import io
-from typing import Any, Optional, Dict, List, Tuple, Callable
+from firebase_functions import https_fn, options
 from starlette.testclient import TestClient
+from fastapi import FastAPI
 import logging
 import traceback
 from typing import Optional, Union
+
+# Configure logging
 logger = logging.getLogger("firebase_handler")
 logger.setLevel(logging.INFO)
 
+# Initialize FastAPI app
 app = FastAPI()
+
 @https_fn.on_request()
 def Maike_Agent_With_Web_Search(req: https_fn.Request) -> https_fn.Response:
     """
-    HTTP function handler that forwards requests to a FastAPI application.
+    Firebase HTTP function that forwards the request to a FastAPI app using Starlette's TestClient.
     
     Args:
-        req: The HTTP request object from Firebase Functions.
-        
+        req (https_fn.Request): The HTTP request object from Firebase Functions.
+    
     Returns:
-        An HTTP response from the FastAPI application.
+        https_fn.Response: The response from the FastAPI application.
     """
     try:
-        # Log incoming request
         logger.info(f"Received {req.method} request to {req.path}")
-        
-        # Create test client for our FastAPI app
+
+        # Set up FastAPI test client
         client = TestClient(app)
-        
-        # Prepare request details
-        method = req.method
+
+        # Prepare full URL
         path = req.path
+        query = req.query_string.decode("utf-8") if hasattr(req, "query_string") and req.query_string else ""
+        full_url = f"{path}?{query}" if query else path
+
+        # Prepare request content
         headers = dict(req.headers)
-        
-        # Handle query string if present
-        query_string = ""
-        if hasattr(req, "query_string") and req.query_string:
-            query_string = req.query_string.decode("utf-8")
-            logger.debug(f"Query string: {query_string}")
-        
-        # Build full URL
-        full_url = path
-        if query_string:
-            full_url += f"?{query_string}"
-        
-        # Get request body if present
         body: Optional[Union[bytes, str]] = None
         if req.method in ("POST", "PUT", "PATCH"):
             body = req.get_data()
-            if body:
-                content_length = len(body)
-                logger.debug(f"Request body size: {content_length} bytes")
-        
-        # Make internal request to FastAPI app
-        logger.debug(f"Forwarding {method} request to FastAPI at {full_url}")
+
+        # Forward request to FastAPI
+        logger.debug(f"Forwarding {req.method} to {full_url}")
         response = client.request(
-            method=method,
+            method=req.method,
             url=full_url,
             headers=headers,
-            content=body,  # Using content instead of data for better compatibility
+            content=body
         )
-        
-        # Log response details
-        logger.info(f"FastAPI responded with status code {response.status_code}")
-        
-        # Create and return Firebase HTTP Response
+
+        logger.info(f"FastAPI responded with status {response.status_code}")
+
         return https_fn.Response(
             response=response.content,
             status=response.status_code,
             headers=dict(response.headers),
         )
-    
+
     except Exception as e:
-        # Log the error with traceback
-        logger.error(f"Error in firebase_handler: {str(e)}")
+        logger.error(f"Error in firebase_handler: {e}")
         logger.error(traceback.format_exc())
-        
-        # Return a 500 error response
+
         return https_fn.Response(
-            response=f"Internal server error: {str(e)}",
+            response=f"Internal server error: {e}",
             status=500,
             headers={"Content-Type": "text/plain"},
         )
