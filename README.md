@@ -49,5 +49,7 @@ This function:
 
 Use \`functions-framework\` or mock HTTP calls to test locally. You can also use \`TestClient\` directly with your FastAPI app for unit testing.
 
+## 📜 License
 
+MIT
 """
