@@ -11,6 +11,7 @@ logger.setLevel(logging.INFO)
 
 # Initialize FastAPI app
 app = FastAPI()
+client = TestClient(app)
 
 @https_fn.on_request()
 def Maike_Agent_With_Web_Search(req: https_fn.Request) -> https_fn.Response:
@@ -27,7 +28,6 @@ def Maike_Agent_With_Web_Search(req: https_fn.Request) -> https_fn.Response:
         logger.info(f"Received {req.method} request to {req.path}")
 
         # Set up FastAPI test client
-        client = TestClient(app)
 
         # Prepare full URL
         path = req.path
