@@ -1,4 +1,3 @@
-README_CONTENT = """
 # 🔄 Firebase to FastAPI Bridge
 
 This Firebase Function acts as a reverse proxy to forward incoming HTTP requests to a FastAPI application. It allows you to use Firebase Hosting or Cloud Functions as a serverless gateway to a FastAPI backend.
@@ -48,8 +47,3 @@ This function:
 ## 🧪 Local Testing
 
 Use \`functions-framework\` or mock HTTP calls to test locally. You can also use \`TestClient\` directly with your FastAPI app for unit testing.
-
-## 📜 License
-
-MIT
-"""
