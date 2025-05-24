@@ -1,49 +1,41 @@
-# 🔄 Firebase to FastAPI Bridge
+# 🔄 firebase_fastapi_wrapper
 
-This Firebase Function acts as a reverse proxy to forward incoming HTTP requests to a FastAPI application. It allows you to use Firebase Hosting or Cloud Functions as a serverless gateway to a FastAPI backend.
+A lightweight wrapper to run FastAPI apps inside Firebase Functions. Enables HTTP request forwarding from Firebase to FastAPI.
 
-## 🧩 Features
+## 🚀 Features
 
-- Supports all HTTP methods (`GET`, `POST`, `PUT`, `PATCH`, `DELETE`)
-- Handles query strings, headers, and body payloads
-- Built-in logging and error handling
-- FastAPI integration via Starlette's `TestClient`
+- Seamlessly proxy Firebase HTTPS requests to FastAPI.
+- Handles headers, query strings, and request body.
+- Works with `firebase-functions` Python SDK.
 
-## 🚀 Deployment
+## 🧩 Install
 
-### Prerequisites
+```bash
+pip install firebase_fastapi_wrapper
+```
+### 🔧 Usage
 
-- Firebase CLI configured
-- \`firebase-functions\`, \`firebase-admin\`, and Python dependencies installed
-- FastAPI app defined
+```python
 
-### File Structure
+from firebase_functions import https_fn
+from fastapi import FastAPI
+from firebase_fastapi_wrapper.wrapper import FastAPIWrapper
 
-\`\`\`
-project/
-│
-├── main.py               # Firebase function file (contains this handler)
-├── app.py or embedded    # FastAPI application instance
-├── requirements.txt
-└── firebase.json
-\`\`\`
+app = FastAPI()
 
-### Deploy to Firebase
+@app.get("/hello")
+def hello():
+    return {"message": "Hello from FastAPI"}
 
-\`\`\`bash
-firebase deploy --only functions
-\`\`\`
+firebase_handler = FastAPIWrapper(app)
 
-Make sure you define the function in your \`firebase.json\` under \`"functions"\`.
-
-## ⚙️ How it works
-
-This function:
-
-1. Receives an HTTP request from Firebase.
-2. Uses Starlette’s \`TestClient\` to simulate a request to a local FastAPI app.
-3. Returns the response from the FastAPI app to the original Firebase client.
-
-## 🧪 Local Testing
-
-Use \`functions-framework\` or mock HTTP calls to test locally. You can also use \`TestClient\` directly with your FastAPI app for unit testing.
+@https_fn.on_request()
+def handle_request(req: https_fn.Request):
+    return firebase_handler(req)
+```
+### 📄 requirements.txt
+```txt
+fastapi>=0.110.0
+starlette>=0.36.3
+firebase-functions>=0.2.0
+```
