@@ -31,11 +31,7 @@ firebase_handler = FastAPIWrapper(app)
 
 @https_fn.on_request()
 def handle_request(req: https_fn.Request):
-    return https_fn.Response(
-            response=firebase_handler(req).content,
-            status=500,
-            headers={"Content-Type": "text/plain"},
-        )
+    return firebase_handler(req)
 ```
 ### 📄 requirements.txt
 ```txt
