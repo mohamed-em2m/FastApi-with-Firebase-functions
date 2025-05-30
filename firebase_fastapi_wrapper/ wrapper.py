@@ -2,6 +2,7 @@ import logging
 import traceback
 from starlette.testclient import TestClient
 from typing import Optional, Union
+from firebase_functions import https_fn
 
 # Configure logging
 logger = logging.getLogger("firebase_handler")
@@ -41,7 +42,6 @@ class FastAPIWrapper:
                 content=body,
             )
 
-            from firebase_functions import https_fn
             return https_fn.Response(
                 response=response.content,
                 status=response.status_code,
